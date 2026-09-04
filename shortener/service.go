@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"strconv"
-	"strings"
 )
 
 type Service struct {
@@ -13,26 +11,32 @@ type Service struct {
 }
 
 func encode(val int) string {
-	var result strings.Builder
+	// we have to append from the back so we use a buffer that we fill
+	// as we gather the remainders during the conversion process
 
-	for loop := true; loop; {
+	buf := make([]byte, 11)
+
+	for i := len(buf) - 1; i >= 0; i-- {
 		q, r := val/62, val%62
 
 		switch {
 		case r >= 0 && r < 10:
-			result.WriteString(strconv.Itoa(r))
+			buf[i] = byte('0' + r)
 		case r > 9 && r < 36:
-			result.WriteString(string(rune(r + 55)))
+			buf[i] = byte(r + 55)
 		case r > 35 && r < 62:
-			result.WriteString(string(rune(r + 61)))
+			buf[i] = byte(r + 61)
 		}
 
 		if q == 0 {
-			loop = false
+			// we mutate the "window" of the slice
+			buf = buf[i:]
+			break
 		}
+		val = q
 	}
 
-	return result.String()
+	return string(buf)
 }
 
 func (s Service) Shorten(longUrl string) (ShortLink, error) {
