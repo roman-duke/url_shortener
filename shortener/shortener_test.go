@@ -136,6 +136,9 @@ func TestService(t *testing.T) {
 		make([]ShortLink, 0),
 	}
 
+	// This was a serious bug (using a value receiver as opposed to a pointer receiver)
+	// on each call, a copy of the struct was being made and pass to the method.
+	// TODO: Look into value and pointer receivers again.
 	newService := Service{&fakeStore}
 
 	// the service shorten method as its own subtest case
