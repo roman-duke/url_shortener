@@ -105,7 +105,7 @@ func (s Service) Resolve(code string) (ShortLink, error) {
 	link, err := s.store.Get(code)
 
 	if err != nil {
-		return ShortLink{}, errors.New("could not resolve short code")
+		return ShortLink{}, err
 	}
 
 	return link, nil

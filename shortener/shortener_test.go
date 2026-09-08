@@ -18,10 +18,7 @@ type ShortenTestCase struct {
 	wantErr error
 }
 
-type ResolveTestCase struct {
-	in   string
-	want ShortLink
-}
+type ResolveTestCase = ShortenTestCase
 
 // we just keep things simple for now
 // we use a struct whose member is a slice
@@ -77,60 +74,60 @@ func (fS *MyFakeStore) GetLinkFromUrl(url string) (ShortLink, error) {
 }
 
 func TestService(t *testing.T) {
-	// base62ConvCases := []EncodingTestCase{
-	// 	{
-	// 		10,
-	// 		"A",
-	// 	},
-	// 	{
-	// 		0,
-	// 		"0",
-	// 	},
-	// 	{
-	// 		61,
-	// 		"z",
-	// 	},
-	// 	{
-	// 		62,
-	// 		"10",
-	// 	},
-	// 	{
-	// 		27,
-	// 		"R",
-	// 	},
-	// 	{
-	// 		83734,
-	// 		"LmY",
-	// 	},
-	// 	{
-	// 		543,
-	// 		"8l",
-	// 	},
-	// 	{
-	// 		1111,
-	// 		"Hv",
-	// 	},
-	// 	{
-	// 		2738578297829239,
-	// 		"CXeCoTFbD",
-	// 	},
-	// 	{
-	// 		1985,
-	// 		"W1",
-	// 	},
-	// 	{
-	// 		737474823,
-	// 		"nuMtD",
-	// 	},
-	// }
+	base62ConvCases := []EncodingTestCase{
+		{
+			10,
+			"A",
+		},
+		{
+			0,
+			"0",
+		},
+		{
+			61,
+			"z",
+		},
+		{
+			62,
+			"10",
+		},
+		{
+			27,
+			"R",
+		},
+		{
+			83734,
+			"LmY",
+		},
+		{
+			543,
+			"8l",
+		},
+		{
+			1111,
+			"Hv",
+		},
+		{
+			2738578297829239,
+			"CXeCoTFbD",
+		},
+		{
+			1985,
+			"W1",
+		},
+		{
+			737474823,
+			"nuMtD",
+		},
+	}
 
-	// for _, tc := range base62ConvCases {
-	// 	t.Run(fmt.Sprintf("convert %d to base62", tc.in), func(t *testing.T) {
-	// 		if got := encode(tc.in); got != tc.want {
-	// 			t.Errorf("got %+v, want %+v", got, tc.want)
-	// 		}
-	// 	})
-	// }
+	for _, tc := range base62ConvCases {
+		t.Run(fmt.Sprintf("convert %d to base62", tc.in), func(t *testing.T) {
+			if got := encode(tc.in); got != tc.want {
+				t.Errorf("got %+v, want %+v", got, tc.want)
+			}
+		})
+	}
 
 	// Creating a fake store in order to test the real
 	// service methods - Shorten and Resolve
@@ -144,7 +141,6 @@ func TestService(t *testing.T) {
 	newService := Service{&fakeStore}
 
 	// the service shorten method as its own subtest case
-	// TODO: Update the table test cases to include the non-happy path too
 	shortenTestCases := []ShortenTestCase{
 		{
 			"http://youtube.com/eren-jaeger",
@@ -194,5 +190,43 @@ func TestService(t *testing.T) {
 	}
 
 	t.Log(fakeStore.shortLinks)
+
 	// the service resolve method as its own subtest case
+	resolveTestCases := []ResolveTestCase{
+		{
+			"KA",
+			ShortLink{
+				"KA",
+				"http://youtube.com/eren-jaeger",
+			},
+			nil,
+		},
+		{
+			"KB",
+			ShortLink{
+				"KB",
+				"https://google.com",
+			},
+			nil,
+		},
+		{
+			"KC",
+			ShortLink{},
+			ErrNotFound,
+		},
+	}
+
+	for _, tc := range resolveTestCases {
+		t.Run(fmt.Sprintf("resolve the given short code -> %v", tc.in), func(t *testing.T) {
+			got, err := newService.Resolve(tc.in)
+
+			if !errors.Is(err, tc.wantErr) {
+				t.Errorf("err = %v, want %v", err, tc.wantErr)
+			}
+
+			if got.code != tc.want.code || got.longUrl != tc.want.longUrl {
+				t.Errorf("got %v, want %v", got, tc.want)
+			}
+		})
+	}
 }
