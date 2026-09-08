@@ -7,7 +7,7 @@ import (
 )
 
 type Service struct {
-	store Store
+	Store Store
 }
 
 func encode(val int) string {
@@ -57,7 +57,7 @@ func (s Service) Shorten(longUrl string) (Link, error) {
 
 	// we check if the longUrl already exists in our store, if so
 	// then we just resolve it
-	sLink, err := s.store.GetLinkFromUrl(longUrl)
+	sLink, err := s.Store.GetLinkFromUrl(longUrl)
 
 	switch {
 	case errors.Is(err, ErrNotFound):
@@ -71,7 +71,7 @@ func (s Service) Shorten(longUrl string) (Link, error) {
 
 	// Here we produce an offset and then we call our encode helper function
 	// in order to produce the base62 string
-	nextId, err := s.store.NextID()
+	nextId, err := s.Store.NextID()
 	if err != nil {
 		return Link{}, errors.New("could not generate short url")
 	}
@@ -88,7 +88,7 @@ func (s Service) Shorten(longUrl string) (Link, error) {
 
 	// We call the method on store to save the short link
 	// without caring about the specifics of the "saving"
-	saveErr := s.store.Save(link)
+	saveErr := s.Store.Save(link)
 
 	if saveErr != nil {
 		return Link{}, errors.New("unexpected error occurred, could not save short url")
@@ -102,7 +102,7 @@ func (s Service) Shorten(longUrl string) (Link, error) {
 
 func (s Service) Resolve(code string) (Link, error) {
 	// Check if the code -> longUrl mapping exists
-	link, err := s.store.Get(code)
+	link, err := s.Store.Get(code)
 
 	if err != nil {
 		return Link{}, err
