@@ -41,7 +41,7 @@ func encode(val int) string {
 
 var ErrInvalidUrl = errors.New("unable to parse url")
 
-func (s Service) Shorten(longUrl string) (ShortLink, error) {
+func (s Service) Shorten(longUrl string) (Link, error) {
 	// first, we need to confirm that the longUrl we even receive
 	// is actually valid via the url specification.
 	parsedUrl, err := url.ParseRequestURI(longUrl)
@@ -52,7 +52,7 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	if err != nil ||
 		!((parsedUrl.Scheme == "http" || parsedUrl.Scheme == "https") &&
 			len(parsedUrl.Host) > 0) {
-		return ShortLink{}, ErrInvalidUrl
+		return Link{}, ErrInvalidUrl
 	}
 
 	// we check if the longUrl already exists in our store, if so
@@ -62,9 +62,9 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	switch {
 	case errors.Is(err, ErrNotFound):
 		// do nothing, this breaks and continues with normal code execution to
-		// go create the shortLink
+		// go create the Link
 	case err != nil:
-		return ShortLink{}, errors.New("could not verify if url already exists")
+		return Link{}, errors.New("could not verify if url already exists")
 	default:
 		return sLink, nil
 	}
@@ -73,17 +73,17 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	// in order to produce the base62 string
 	nextId, err := s.store.NextID()
 	if err != nil {
-		return ShortLink{}, errors.New("could not generate short url")
+		return Link{}, errors.New("could not generate short url")
 	}
 
 	// we use this as our offset so that initial codes are not "weird"
 	offset := 1250
 	c := encode(nextId + offset)
 
-	// build the ShortLink that our domain describes/knows.
-	link := ShortLink{
-		code:    c,
-		longUrl: longUrl,
+	// build the Link that our domain describes/knows.
+	link := Link{
+		Code:    c,
+		LongUrl: longUrl,
 	}
 
 	// We call the method on store to save the short link
@@ -91,7 +91,7 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	saveErr := s.store.Save(link)
 
 	if saveErr != nil {
-		return ShortLink{}, errors.New("unexpected error occurred, could not save short url")
+		return Link{}, errors.New("unexpected error occurred, could not save short url")
 	}
 
 	// // Just to indicate that we generate our shortcode successfully
@@ -100,12 +100,12 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	return link, nil
 }
 
-func (s Service) Resolve(code string) (ShortLink, error) {
+func (s Service) Resolve(code string) (Link, error) {
 	// Check if the code -> longUrl mapping exists
 	link, err := s.store.Get(code)
 
 	if err != nil {
-		return ShortLink{}, err
+		return Link{}, err
 	}
 
 	return link, nil
