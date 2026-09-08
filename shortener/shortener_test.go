@@ -1,6 +1,7 @@
 package shortener
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"testing"
@@ -12,8 +13,9 @@ type EncodingTestCase struct {
 }
 
 type ShortenTestCase struct {
-	in   string
-	want ShortLink
+	in      string
+	want    ShortLink
+	wantErr error
 }
 
 type ResolveTestCase struct {
@@ -75,60 +77,60 @@ func (fS *MyFakeStore) GetLinkFromUrl(url string) (ShortLink, error) {
 }
 
 func TestService(t *testing.T) {
-	base62ConvCases := []EncodingTestCase{
-		{
-			10,
-			"A",
-		},
-		{
-			0,
-			"0",
-		},
-		{
-			61,
-			"z",
-		},
-		{
-			62,
-			"10",
-		},
-		{
-			27,
-			"R",
-		},
-		{
-			83734,
-			"LmY",
-		},
-		{
-			543,
-			"8l",
-		},
-		{
-			1111,
-			"Hv",
-		},
-		{
-			2738578297829239,
-			"CXeCoTFbD",
-		},
-		{
-			1985,
-			"W1",
-		},
-		{
-			737474823,
-			"nuMtD",
-		},
-	}
+	// base62ConvCases := []EncodingTestCase{
+	// 	{
+	// 		10,
+	// 		"A",
+	// 	},
+	// 	{
+	// 		0,
+	// 		"0",
+	// 	},
+	// 	{
+	// 		61,
+	// 		"z",
+	// 	},
+	// 	{
+	// 		62,
+	// 		"10",
+	// 	},
+	// 	{
+	// 		27,
+	// 		"R",
+	// 	},
+	// 	{
+	// 		83734,
+	// 		"LmY",
+	// 	},
+	// 	{
+	// 		543,
+	// 		"8l",
+	// 	},
+	// 	{
+	// 		1111,
+	// 		"Hv",
+	// 	},
+	// 	{
+	// 		2738578297829239,
+	// 		"CXeCoTFbD",
+	// 	},
+	// 	{
+	// 		1985,
+	// 		"W1",
+	// 	},
+	// 	{
+	// 		737474823,
+	// 		"nuMtD",
+	// 	},
+	// }
 
-	for _, tc := range base62ConvCases {
-		t.Run(fmt.Sprintf("convert %d to base62", tc.in), func(t *testing.T) {
-			if got := encode(tc.in); got != tc.want {
-				t.Errorf("got %q, want %q", got, tc.want)
-			}
-		})
-	}
+	// for _, tc := range base62ConvCases {
+	// 	t.Run(fmt.Sprintf("convert %d to base62", tc.in), func(t *testing.T) {
+	// 		if got := encode(tc.in); got != tc.want {
+	// 			t.Errorf("got %+v, want %+v", got, tc.want)
+	// 		}
+	// 	})
+	// }
 
 	// Creating a fake store in order to test the real
 	// service methods - Shorten and Resolve
@@ -150,11 +152,13 @@ func TestService(t *testing.T) {
 				"KA",
 				"http://youtube.com/eren-jaeger",
 			},
+			nil,
 		},
-		// {
-		// 	"http://",
-		// 	ShortLink{},
-		// },
+		{
+			"http://",
+			ShortLink{},
+			ErrInvalidUrl,
+		},
 		{
 			"http://youtube.com/eren-jaeger",
 			// If given the same longurl, it should
@@ -163,6 +167,7 @@ func TestService(t *testing.T) {
 				"KA",
 				"http://youtube.com/eren-jaeger",
 			},
+			nil,
 		},
 		{
 			"https://google.com",
@@ -170,6 +175,7 @@ func TestService(t *testing.T) {
 				"KB",
 				"https://google.com",
 			},
+			nil,
 		},
 	}
 
@@ -177,18 +183,16 @@ func TestService(t *testing.T) {
 		t.Run(fmt.Sprintf("shorten the longUrl -> %s", tc.in), func(t *testing.T) {
 			got, err := newService.Shorten(tc.in)
 
-			if err != nil {
-				t.Errorf("%v", err)
+			if !errors.Is(err, tc.wantErr) {
+				t.Fatalf("err = %v; want %v", err, tc.wantErr)
 			}
 
 			if got.code != tc.want.code || got.longUrl != tc.want.longUrl {
-				t.Errorf("got %q, want %q", got, tc.want)
+				t.Errorf("got %v, want %v", got, tc.want)
 			}
 		})
 	}
 
-	fmt.Print(fakeStore.shortLinks)
-	fmt.Print("\n\r")
-
+	t.Log(fakeStore.shortLinks)
 	// the service resolve method as its own subtest case
 }

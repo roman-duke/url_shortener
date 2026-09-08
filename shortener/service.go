@@ -2,7 +2,7 @@ package shortener
 
 import (
 	"errors"
-	"fmt"
+	// "fmt"
 	"net/url"
 )
 
@@ -39,6 +39,8 @@ func encode(val int) string {
 	return string(buf)
 }
 
+var ErrInvalidUrl = errors.New("unable to parse url")
+
 func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	// first, we need to confirm that the longUrl we even receive
 	// is actually valid via the url specification.
@@ -50,7 +52,7 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 	if err != nil ||
 		!((parsedUrl.Scheme == "http" || parsedUrl.Scheme == "https") &&
 			len(parsedUrl.Host) > 0) {
-		return ShortLink{}, errors.New("unable to parse url")
+		return ShortLink{}, ErrInvalidUrl
 	}
 
 	// we check if the longUrl already exists in our store, if so
@@ -92,8 +94,8 @@ func (s Service) Shorten(longUrl string) (ShortLink, error) {
 		return ShortLink{}, errors.New("unexpected error occurred, could not save short url")
 	}
 
-	// Just to indicate that we generate our shortcode successfully
-	fmt.Printf("Generated code ->%s", c)
+	// // Just to indicate that we generate our shortcode successfully
+	// fmt.Printf("Generated code ->%s", c)
 
 	return link, nil
 }
