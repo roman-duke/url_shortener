@@ -142,6 +142,7 @@ func TestService(t *testing.T) {
 	newService := Service{&fakeStore}
 
 	// the service shorten method as its own subtest case
+	// TODO: Update the table test cases to include the non-happy path too
 	shortenTestCases := []ShortenTestCase{
 		{
 			"http://youtube.com/eren-jaeger",
