@@ -7,7 +7,7 @@ import (
 )
 
 type Service struct {
-	Store Store
+	Store Persistence
 }
 
 func encode(val int) string {
