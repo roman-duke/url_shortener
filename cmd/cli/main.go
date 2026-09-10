@@ -29,8 +29,7 @@ func main() {
 	// create the store
 	store := memory.MyStore{}
 
-	// quick test of the end-to-end flow
-	service := shortener.Service{Store: &store}
+	svc := shortener.NewService(&store)
 
 	// print the welcome message
 	fmt.Printf("\n%s============================================================================\n", Cyan)
@@ -68,7 +67,7 @@ func main() {
 		cmd := tokens[0]
 		args := tokens[1:]
 
-		dispatch(&service, cmd, args, os.Stdout, os.Stderr)
+		dispatch(svc, cmd, args, os.Stdout, os.Stderr)
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
