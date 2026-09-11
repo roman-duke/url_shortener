@@ -11,6 +11,8 @@ import (
 	"github.com/alexedwards/scs/v2"
 )
 
+type Dir string
+
 type GlobalState struct {
 	Count int
 }
@@ -58,6 +60,9 @@ func main() {
 
 		getHandler(w, r)
 	})
+
+	fs := http.FileServer(http.Dir("./cmd/web/assets"))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// Add the middleware
 	muxWithSessionMiddleware := sessionManager.LoadAndSave(mux) // *currently a knowledge gap*

@@ -2,19 +2,27 @@ package main
 
 import "strconv"
 
-templ counts(global, user int) {
-	<div>Gloabal: { strconv.Itoa(global) }</div>
-	<div>User: { strconv.Itoa(user) }</div>
-}
+templ form(global, session int) {
+	<form id="countsForm" action="/" method="POST" hx-post="/" hx-swap="outerHTML" hx-select="#countsForm">
+		<div>Gloabal: { strconv.Itoa(global) }</div>
+		<div>User: { strconv.Itoa(session) }</div>
 
-templ form() {
-	<form action="/" method="post">
 		<div><button type="submit" name="global" value="global">Global</button></div>
 		<div><button type="submit" name="user" value="user">User</button></div>
 	</form>
 }
 
 templ page(global, user int) {
-	@counts(global, user)
-	@form()
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Document</title>
+			<script src="/static/js/htmx.min.js"></script>
+		</head>
+		<body>
+			@form(global, user)
+		</body>
+	</html>
 }
