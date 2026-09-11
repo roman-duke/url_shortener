@@ -1,50 +1,70 @@
 package main
 
+// Basic Counter Application using templ
+
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
-	// "github.com/a-h/templ"
+	"github.com/alexedwards/scs/v2"
 )
 
-// We generally should have a constructor function (idiomatic Go)
-
-// this is cool for generating static data
-// as you can see, any argument passed to the templ component is rendered
-// at runtime and we have no way to generate dynamic data. But this is quite
-// important as we can actually generate the static assets once during build
-// time and then just serve those static assets on that route. This would
-// prevent computation for each request - basically the whole idea of SSG.
-
-//============================= SSG-ish ====================================//
-// func main() {
-// 	http.Handle("/", templ.Handler(appShell("Eren Jaeger", time.Now())))
-// 	http.Handle("/404", templ.Handler(notFoundComponent()))
-
-// 	fmt.Println("Listening on http://localhost:3000")
-// 	http.ListenAndServe(":3000", nil)
-// }
-
-// Now we look towards the idea of ssr (which would allow us generate dynamic content)
-func NewNowHanlder(now func() time.Time) NowHandler {
-	return NowHandler{Now: now}
+type GlobalState struct {
+	Count int
 }
 
-type NowHandler struct {
-	Now func() time.Time
+var global GlobalState
+var sessionManager *scs.SessionManager
+
+func getHandler(w http.ResponseWriter, r *http.Request) {
+	userCount := sessionManager.GetInt(r.Context(), "count")
+	component := page(global.Count, userCount)
+	component.Render(r.Context(), w)
 }
 
-func (nh NowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	timeComponent(nh.Now()).Render(r.Context(), w)
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	// Update state
+	r.ParseForm()
+
+	// confirm if the global button was pressed
+	if r.Form.Has("global") {
+		global.Count++
+	}
+
+	if r.Form.Has("user") {
+		currentCount := sessionManager.GetInt(r.Context(), "count")
+		sessionManager.Put(r.Context(), "count", currentCount+1)
+	}
+
+	// Display the form.
+	getHandler(w, r)
 }
 
-// =============================== SSR-ish ==============================//
 func main() {
-	http.Handle("/", NewNowHanlder(time.Now))
+	// Initialize the session
+	sessionManager = scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
 
-	fmt.Printf("\033[36m\033[1mListening on http://localhost:8080\033[0m\n")
+	mux := http.NewServeMux()
 
-	http.ListenAndServe(":8080", nil)
+	// Handle POST and GET requests
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			postHandler(w, r)
+			return
+		}
 
+		getHandler(w, r)
+	})
+
+	// Add the middleware
+	muxWithSessionMiddleware := sessionManager.LoadAndSave(mux) // *currently a knowledge gap*
+
+	// start the server
+	fmt.Printf("\033[36mlistening on http://localhost:8000\033[0m")
+	if err := http.ListenAndServe(":8000", muxWithSessionMiddleware); err != nil {
+		log.Printf("error listening: %v", err)
+	}
 }
