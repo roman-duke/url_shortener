@@ -1,75 +1,9 @@
 package main
 
-// Basic Counter Application using templ
-
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"time"
-
-	"github.com/alexedwards/scs/v2"
 )
 
-type Dir string
-
-type GlobalState struct {
-	Count int
-}
-
-var global GlobalState
-var sessionManager *scs.SessionManager
-
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	userCount := sessionManager.GetInt(r.Context(), "count")
-	component := page(global.Count, userCount)
-	component.Render(r.Context(), w)
-}
-
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	// Update state
-	r.ParseForm()
-
-	// confirm if the global button was pressed
-	if r.Form.Has("global") {
-		global.Count++
-	}
-
-	if r.Form.Has("user") {
-		currentCount := sessionManager.GetInt(r.Context(), "count")
-		sessionManager.Put(r.Context(), "count", currentCount+1)
-	}
-
-	// Display the form.
-	getHandler(w, r)
-}
-
 func main() {
-	// Initialize the session
-	sessionManager = scs.New()
-	sessionManager.Lifetime = 24 * time.Hour
-
-	mux := http.NewServeMux()
-
-	// Handle POST and GET requests
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			postHandler(w, r)
-			return
-		}
-
-		getHandler(w, r)
-	})
-
-	fs := http.FileServer(http.Dir("./cmd/web/assets"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-
-	// Add the middleware
-	muxWithSessionMiddleware := sessionManager.LoadAndSave(mux) // *currently a knowledge gap*
-
-	// start the server
-	fmt.Printf("\033[36mlistening on http://localhost:8000\033[0m")
-	if err := http.ListenAndServe(":8000", muxWithSessionMiddleware); err != nil {
-		log.Printf("error listening: %v", err)
-	}
+	fmt.Println("Web layer adapter of the URL shortener project")
 }
