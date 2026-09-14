@@ -2,3 +2,7 @@
 # are to be ignored by git
 thoughts.md
 notes/
+
+
+# Ignore the temp bin dir
+bin/
