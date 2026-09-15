@@ -1,0 +1,19 @@
+package main
+
+import "github.com/roman-duke/url_shortener/cmd/web/components"
+
+templ app() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Shortly</title>
+			<link rel="stylesheet" href="/static/styles/index.css"/>
+		</head>
+		<body class="flex flex-col items-center mt-2 sm:mt-8 p-5 bg-gray-200 gap-y-6 max-w-185 mx-auto">
+			@components.HeaderComponent()
+			@components.MainComponent()
+		</body>
+	</html>
+}

@@ -6,9 +6,8 @@ STYLES_ROOT := ./cmd/web/assets/styles
 .PHONY: dev setup install-tailwind clean
 
 dev: setup
-		go tool templ generate --watch --proxy="http://localhost:8080" & \
-		$(TAILWIND_BIN) -i $(STYLES_ROOT)/input.css -o $(STYLES_ROOT)/output.css --watch & \
-		go run ./cmd/web & \
+		go tool templ generate --watch --proxy="http://localhost:8080" --cmd="go run ./cmd/web" & \
+		$(TAILWIND_BIN) -i $(STYLES_ROOT)/input.css -o $(STYLES_ROOT)/index.css --watch & \
 		wait
 
 # Ensure the necessary dependencies (tools) exist
