@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -32,21 +33,27 @@ func shortenHandler(val string) templ.Component {
 	return components.ShortenComponent(val, shortLink.Code, err)
 }
 
-func resolveHandler(code string) templ.Component {
+func resolveHandler(code string) (string, error) {
 	// call the service layer to resolve the short code
 	sLink, err := service.Resolve(code)
 
-	return components.ResolveComponent(sLink.LongUrl, err)
+	return sLink.LongUrl, err
 }
 
-func postHandler(w http.ResponseWriter, r *http.Request) {
+func requestHandler(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	switch r.URL.Path {
-	case "/shorten":
+	switch r.Method {
+	case "POST":
+		// Check if we are on the right path
+		if p := r.URL.Path; p != "/shorten" {
+			return
+			// components.NotFoundComponent().Render(r.Context(), w)
+		}
+
 		// Extract the link field from the form
 		// and call the respective service layer
 		l := r.FormValue("link")
@@ -55,14 +62,20 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		// return the rendered html
 		component.Render(r.Context(), w)
 
-	case "/resolve":
+	case "GET":
 		// Extract just the code field from the
 		// form and call the respective service layer
-		c := r.FormValue("code")
-		component := resolveHandler(c)
+		c := r.URL.Path[1:]
+		longUrl, err := resolveHandler(c)
 
-		// return the rendered html
-		component.Render(r.Context(), w)
+		fmt.Print(longUrl)
+
+		if errors.Is(err, shortener.ErrNotFound) {
+			components.NotFoundComponent().Render(r.Context(), w)
+		}
+
+		http.Redirect(w, r, longUrl, 302)
+		return
 	}
 }
 
@@ -86,8 +99,8 @@ func main() {
 	// ============================================= //
 
 	http.Handle("/", templ.Handler(component))
-	http.HandleFunc("POST /shorten", postHandler)
-	http.HandleFunc("POST /resolve", postHandler)
+	http.HandleFunc("GET /{slug}", requestHandler)
+	http.HandleFunc("POST /shorten", requestHandler)
 
 	fmt.Printf("%sServer listening at http://localhost:8080\n%s", Cyan, Reset)
 

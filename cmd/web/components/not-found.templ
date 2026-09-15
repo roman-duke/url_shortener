@@ -1,8 +1,6 @@
-package main
+package components
 
-import "github.com/roman-duke/url_shortener/cmd/web/components"
-
-templ app() {
+templ NotFoundComponent() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -10,14 +8,17 @@ templ app() {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<!--            all responses are swapped         -->
 			<!-- this causes all htmx responses to be swapped -->
-			<meta name="htmx-config" content='{"responseHandling": [{"code":".*", "swap": true}]}'/>
 			<title>Shortly</title>
 			<link rel="stylesheet" href="/static/styles/index.css"/>
-			<script src="/static/js/htmx.min.js"></script>
+			// <script src="/static/js/htmx.min.js"></script>
 		</head>
 		<body id="root" class="flex flex-col items-center mt-2 sm:mt-8 p-5 bg-gray-200 gap-y-6 max-w-185 mx-auto">
-			@components.HeaderComponent()
-			@components.MainComponent()
+			<div class="flex flex-col">
+				<h1 class="font-semibold text-red-700 text-3xl">404 (Not Found)</h1>
+				<p class="text-slate-500">
+					Destination Url Not Found
+				</p>
+			</div>
 		</body>
 	</html>
 }
