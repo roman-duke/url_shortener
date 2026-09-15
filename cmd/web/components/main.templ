@@ -1,24 +1,53 @@
 package components
 
-templ ShortenComponent() {
-	<div class="space-y-3">
-		<h2 class="font-bold text-xl">Shorten a long link</h2>
-		<form class="space-y-5">
-			<label class="flex flex-col gap-y-0.5">
-				Paste your long link here...
-				<input class="border rounded-lg p-2 outline-neutral-400" placeholder="https://example.com/my-long-url" autofocus/>
-			</label>
-			<button type="button" class="w-full h-10 rounded-lg bg-gray-600 text-white hover:bg-black cursor-pointer">Submit</button>
-		</form>
+// Mini-components
+templ URLParseErrComponent(err error) {
+	if err != nil {
+		<span class="text-sm text-red-700">
+			Invalid url provided :(
+		</span>
+	}
+}
+
+templ ShortenComponent(val, code string, err error) {
+	{{ url := "http://localhost:8080/" + code }}
+	<div id="shorten-component" class="space-y-3">
+		<h2 class="text-amber-700 font-semibold text-xl">Shorten a long link</h2>
+		if len(code) > 1 {
+			<div class="">
+				Here is your shortened link: <a href={ url } class="underline text-cyan-800 visited:text-violet-500"><span>{ url }</span></a>
+			</div>
+		} else {
+			<form hx-post="/shorten" class="space-y-5" hx-target="#shorten-component" hx-swap="outerHTML">
+				<div>
+					<label class="flex flex-col gap-y-0.5">
+						Paste your long link here...
+						<input
+							value={ val }
+							name="link"
+							autofocus="true"
+							placeholder="https://example.com/my-long-url"
+							class="border rounded-lg p-2 outline-neutral-400 focus:ring-0 placeholder:text-sm"
+						/>
+					</label>
+					@URLParseErrComponent(err)
+				</div>
+				<button
+					class="w-full h-10 rounded-lg bg-gray-600 text-white hover:bg-black cursor-pointer"
+				>
+					Generate link
+				</button>
+			</form>
+		}
 	</div>
 }
 
-templ ResolveComponent() {
+templ ResolveComponent(val string, err error) {
 	<form class=""></form>
 }
 
 templ MainComponent() {
-	<main class="border-0 rounded-lg px-3 py-5 bg-zinc-300 w-[80%]">
-		@ShortenComponent()
+	<main class="border-0 rounded-lg px-3 py-5 bg-gray-300 w-[80%]">
+		@ShortenComponent("", "", nil)
 	</main>
 }

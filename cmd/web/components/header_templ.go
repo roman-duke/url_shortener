@@ -29,7 +29,7 @@ func HeaderComponent() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"flex flex-col items-center\"><h1 class=\"text-xl font-semibold text-slate-900\">Shortly</h1><p class=\"text-sm text-center w-[80%]\">Toy project implementation of a very simple url-shortener that uses the base62 for generation of the short codes.</p></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"flex flex-col items-center\"><h1 class=\"text-3xl font-semibold text-amber-800\">Shortly</h1><p class=\"text-gray-600 text-center w-[80%]\">Toy project implementation of a very simple url-shortener that uses the base62 for generation of the short codes.</p></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

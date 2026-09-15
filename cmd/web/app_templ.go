@@ -31,7 +31,7 @@ func app() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Shortly</title><link rel=\"stylesheet\" href=\"/static/styles/index.css\"></head><body class=\"flex flex-col items-center mt-2 sm:mt-8 p-5 bg-gray-200 gap-y-6 max-w-185 mx-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!--            all responses are swapped         --><!-- this causes all htmx responses to be swapped --><meta name=\"htmx-config\" content='{\"responseHandling\": [{\"code\":\".*\", \"swap\": true}]}'><title>Shortly</title><link rel=\"stylesheet\" href=\"/static/styles/index.css\"><script src=\"/static/js/htmx.min.js\"></script></head><body class=\"flex flex-col items-center mt-2 sm:mt-8 p-5 bg-gray-200 gap-y-6 max-w-185 mx-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
