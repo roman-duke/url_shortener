@@ -78,8 +78,6 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func getHandler(w http.ResponseWriter, r *http.Request) {}
-
 func main() {
 	component := app()
 
