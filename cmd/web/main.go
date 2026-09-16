@@ -63,18 +63,17 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 		component.Render(r.Context(), w)
 
 	case "GET":
-		// Extract just the code field from the
-		// form and call the respective service layer
+		// Extract just the slug from the path
 		c := r.URL.Path[1:]
 		longUrl, err := resolveHandler(c)
 
-		fmt.Print(longUrl)
-
 		if errors.Is(err, shortener.ErrNotFound) {
+			w.WriteHeader(http.StatusNotFound)
 			components.NotFoundComponent().Render(r.Context(), w)
+			return
 		}
 
-		http.Redirect(w, r, longUrl, 302)
+		http.Redirect(w, r, longUrl, http.StatusFound)
 		return
 	}
 }
