@@ -35,4 +35,4 @@ go run ./cmd/cli
 ```
 
 
-> _I don't want to believe. I want to know._ ~ **Carl Sagan**
+> _Perseverance is not a long race; it is many short races one after the other._ ~ **Walter Elliot**
